@@ -13,60 +13,72 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+    <!-- Bootstrap Multiselect CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-multiselect@1.1.0/dist/css/bootstrap-multiselect.css">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
     @stack('styles')
 
+    {{-- LIVEWIRE STYLES --}}
+    @livewireStyles
 </head>
 
 <body>
     <div id="app">
+
+        {{-- NAVBAR --}}
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
+                <a class="navbar-brand" href="{{ route('dashboard') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
+
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                    data-bs-target="#navbarSupportedContent">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
+                        @auth
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('information.*') ? 'active fw-bold' : '' }}"
+                                    href="{{ route('information.index') }}">
+                                    <i class="bi bi-info-circle me-1"></i> Information
+                                </a>
+                            </li>
 
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('leads.*') ? 'active fw-bold' : '' }}"
+                                    href="{{ route('leads.index') }}">
+                                    <i class="bi bi-people me-1"></i> Leads
+                                </a>
+                            </li>
+                        @endauth
                     </ul>
 
-                    <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
                         @guest
-                            @if (Route::has('login'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                                </li>
-                            @endif
-
-                            <!-- @if (Route::has('register'))
-    <li class="nav-item">
-                                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                                </li>
-    @endif -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('login') }}">Login</a>
+                            </li>
                         @else
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                     {{ Auth::user()->name }}
                                 </a>
 
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu dropdown-menu-end">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                        onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
+                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                        Logout
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -80,51 +92,81 @@
             </div>
         </nav>
 
-        <main class="py-4">
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-            <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-            <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet">
-            @auth
-                <meta name="user-id" content="{{ Auth::user()->id }}">
-            @endauth
+        {{-- NOTIFICATION --}}
+        <div id="notify-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999" wire:ignore></div>
 
-            <script>
-                var userId = $('meta[name="user-id"]').attr('content');
+        {{-- MAIN CONTENT --}}
+        <main class="py-4 container">
 
-                if (userId !== '8') {
-                    $(document).bind("contextmenu", function(e) {
-                        return false;
-                    });
-                    $(document).on("cut", function(e) {
-                        alert('cut. not allowed!');
-                        e.preventDefault();
-                    });
-                    $(document).on("copy", function(e) {
-                        alert('copy. not allowed!');
-                        e.preventDefault();
-                    });
-                    $(document).keydown(function(e) {
-                        // console.log(e.which)
-                        // if (e.which === 123) {
-                        //     alert('not allowed!');
-                        //     e.preventDefault();
-                        //     return false
-                        // }
+            {{-- FOR LIVEWIRE ROUTE COMPONENTS --}}
+            {{ $slot ?? '' }}
 
-                    });
-                }
-                $(document).ready(function() {
-                    //$('#example').DataTable();
-                    // var table = $('#example').DataTable({
-                    //     "order": [[5, 'desc']]
-                    //     });
-                });
-            </script>
-            @stack('scripts')
-
+            {{-- FOR NORMAL BLADE VIEWS --}}
             @yield('content')
+
         </main>
     </div>
+
+    {{-- LIVEWIRE SCRIPTS --}}
+    @livewireScripts
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <!-- select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    {{-- EXTRA SCRIPTS --}}
+    @stack('scripts')
+
+    <script>
+        var userId = $('meta[name="user-id"]').attr('content');
+
+        if (userId !== '8') {
+            $(document).bind("contextmenu", function(e) {
+                return false;
+            });
+            $(document).on("cut", function(e) {
+                alert('cut. not allowed!');
+                e.preventDefault();
+            });
+            $(document).on("copy", function(e) {
+                alert('copy. not allowed!');
+                e.preventDefault();
+            });
+            $(document).keydown(function(e) {
+                // console.log(e.which)
+                if (e.which === 123) {
+                    alert('not allowed!');
+                    e.preventDefault();
+                    return false
+                }
+
+            });
+        }
+        $(document).ready(function() {
+            //$('#example').DataTable();
+            // var table = $('#example').DataTable({
+            //     "order": [[5, 'desc']]
+            //     });
+        });
+
+        window.addEventListener('notify', event => {
+        const { type, message } = event.detail;
+
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+
+        const container = document.getElementById('notify-container');
+        container.appendChild(alert);
+
+        setTimeout(() => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 500);
+        }, 8000);
+    });
+
+    </script>
 </body>
 
 </html>

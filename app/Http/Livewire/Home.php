@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\Information;
+use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -15,7 +16,7 @@ class Home extends Component
     public $search = '';
     public $sortField = 'informations.created_at';
     public $sortAsc = false;
-    public $perPage = 10;
+    public $perPage = 25;
     public $date_from;
     public $date_to;
     public $filter_user;
@@ -27,6 +28,11 @@ class Home extends Component
     {
         $query = Information::with('user')
             ->leftJoin('users', 'users.id', '=', 'informations.user_id')
+            ->whereNotExists(function ($q) {
+                $q->selectRaw(1)
+                    ->from('leads')
+                    ->whereColumn('leads.information_id', 'informations.id');
+            })
             ->select('informations.*');
 
         if (Auth::user()->isadmin == 0) {
@@ -44,6 +50,7 @@ class Home extends Component
                     ->orWhere('informations.text6', 'like', "%{$this->search}%")
                     ->orWhere('informations.text7', 'like', "%{$this->search}%")
                     ->orWhere('informations.text8', 'like', "%{$this->search}%")
+                    ->orWhere('informations.text9', 'like', "%{$this->search}%")
                     ->orWhere('users.name', 'like', "%{$this->search}%")
                     ->orWhere('informations.created_at', 'like', "%{$this->search}%");
             });
@@ -61,16 +68,16 @@ class Home extends Component
             $query->where('informations.user_id', $this->filter_user);
         }
 
-         $total_records = (clone $query)->count();
+        $total_records = (clone $query)->count();
 
         // Sorting + Pagination
-        $users = $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')->paginate($this->perPage);
+        $informations = $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')->paginate($this->perPage);
 
         // Count total items with same filter
-        $allUsers = User::select('id','name')->orderBy('name')->get();
+        $allUsers = User::select('id', 'name')->orderBy('name')->get();
 
         return view('livewire.home', [
-            'users'      => $users,
+            'informations'      => $informations,
             'all_users'  => $allUsers,
             'total_records'  => $total_records,
         ]);
@@ -118,6 +125,7 @@ class Home extends Component
                         ->orWhere('text6', 'like', "%{$this->search}%")
                         ->orWhere('text7', 'like', "%{$this->search}%")
                         ->orWhere('text8', 'like', "%{$this->search}%")
+                        ->orWhere('text9', 'like', "%{$this->search}%")
                         ->orWhereHas('user', function ($u) {
                             $u->where('name', 'like', "%{$this->search}%");
                         });
@@ -125,9 +133,17 @@ class Home extends Component
             })
             ->when($this->date_from, fn($q) => $q->whereDate('created_at', '>=', $this->date_from))
             ->when($this->date_to, fn($q) => $q->whereDate('created_at', '<=', $this->date_to))
-            ->when(Auth::user()->isadmin == 1 && $this->filter_user, fn($q) => 
+            ->when(
+                Auth::user()->isadmin == 1 && $this->filter_user,
+                fn($q) =>
                 $q->where('user_id', $this->filter_user)
             );
+
+        $query->whereNotExists(function ($q) {
+            $q->selectRaw(1)
+                ->from('leads')
+                ->whereColumn('leads.information_id', 'informations.id');
+        });
 
         // Normal user gets only own data
         if (Auth::user()->isadmin == 0) {
@@ -185,8 +201,37 @@ class Home extends Component
     public function viewLead($id)
     {
         $this->selectedLead = Information::with('user')->find($id);
-        
+
         // Optional: If you want to automatically open modal
         $this->dispatchBrowserEvent('openLeadModal');
+    }
+
+    public function convertToLead($id)
+    {
+        $info = Information::findOrFail($id);
+
+        // Prevent duplicate conversion
+        if (Lead::where('information_id', $id)->exists()) {
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'danger',
+                'message' => 'Already converted to lead'
+            ]);
+            session()->flash('error', 'Already converted to lead');
+            return;
+        }
+
+        Lead::create([
+            'information_id' => $id,
+            'user_id' => $info->user_id,
+            'status' => 'new',
+        ]);
+
+        $this->resetPage();
+
+        $this->dispatchBrowserEvent('notify', [
+            'type' => 'success',
+            'message' => 'Converted to Lead successfully'
+        ]);
+        // session()->flash('success', 'Converted to Lead successfully');
     }
 }
