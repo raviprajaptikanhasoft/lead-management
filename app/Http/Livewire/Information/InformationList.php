@@ -219,7 +219,7 @@ class InformationList extends Component
 
         Lead::create([
             'information_id' => $id,
-            'user_id' => $info->user_id,
+            'user_id' => Auth::id(),
             // 'status' => 'New',
         ]);
         
@@ -231,6 +231,5 @@ class InformationList extends Component
             'type' => 'success',
             'message' => 'Converted to Lead successfully'
         ]);
-        // session()->flash('success', 'Converted to Lead successfully');
     }
 }

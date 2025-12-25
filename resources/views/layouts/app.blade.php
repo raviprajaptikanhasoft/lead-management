@@ -15,9 +15,6 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- Bootstrap Multiselect CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-multiselect@1.1.0/dist/css/bootstrap-multiselect.css">
-    
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
@@ -61,6 +58,15 @@
                                     <i class="bi bi-people me-1"></i> Leads
                                 </a>
                             </li>
+
+                            @if(auth()->user()->isAdmin())
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('users.*') ? 'active fw-bold' : '' }}"
+                                    href="{{ route('users.index') }}">
+                                    <i class="bi bi-person-lines-fill me-1"></i> Users
+                                </a>
+                            </li>
+                            @endif
                         @endauth
                     </ul>
 
@@ -163,7 +169,7 @@
         setTimeout(() => {
             alert.classList.remove('show');
             setTimeout(() => alert.remove(), 500);
-        }, 8000);
+        }, 3000);
     });
 
     </script>

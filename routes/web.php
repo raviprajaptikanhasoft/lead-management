@@ -1,9 +1,10 @@
 <?php
 
-use App\Http\Livewire\Home;
+use App\Http\Livewire\Dashboard;
 use App\Http\Livewire\Information\InformationList;
 use App\Http\Livewire\Lead\LeadList;
-use App\Http\Livewire\Leads;
+use App\Http\Livewire\Lead\Show;
+use App\Http\Livewire\User\UserList;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -34,9 +35,13 @@ Auth::routes(['register' => false,]);
 
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', \App\Http\Livewire\Dashboard::class)->name('dashboard');
+    Route::get('/', Dashboard::class)->name('dashboard');
+    
     Route::get('/information', InformationList::class)->name('information.index');
     // Route::get('/information', Home::class)->name('information.index');
+    
     Route::get('/leads', LeadList::class)->name('leads.index');
-    Route::get('/leads/{lead}', \App\Http\Livewire\Lead\Show::class)->name('leads.show');
+    Route::get('/leads/{lead}', Show::class)->name('leads.show');
+
+    Route::get('/users', UserList::class)->name('users.index');
 });

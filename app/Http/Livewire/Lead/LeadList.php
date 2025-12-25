@@ -30,7 +30,7 @@ class LeadList extends Component
     {
         $query = Lead::with(['information', 'user', 'notes']);
 
-        if (!Auth::user()->isAdmin()) {
+        if (!Auth::user()->isadmin) {
             $query->where('user_id', Auth::id());
         }
         

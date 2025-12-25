@@ -168,11 +168,13 @@
                                         </td>
                                         {{-- <td>{{ substr($information->text8, 0, 50) }}</td> --}}
                                         <td>{{ substr($information->text9, 0, 20) }}</td>
-                                        <td>{{ $information->user->name }}</td>
-                                        <td>{{ date('d-m-Y H:i:s', strtotime($information->created_at)) }}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" wire:click="viewLead({{ $information->id }})" data-bs-toggle="modal" data-bs-target="#leadModal" title="View Lead Details">View</button>
-                                            <button class="btn btn-sm btn-success"wire:click="convertToLead({{ $information->id }})" title="Convert to Lead"><i class="bi bi-person-plus-fill"></i></button>
+                                        <td>{{ $information->user->name ?? '-' }}</td>
+                                        <td>{{ $information->created_at->format('d-m-Y H:i:s') }}</td>
+                                        <td class="text-center align-middle">
+                                            <div class="d-flex justify-content-center gap-1 flex-nowrap">
+                                                <button class="btn btn-sm btn-primary" wire:click="viewLead({{ $information->id }})" title="View Lead Details" data-bs-toggle="modal" data-bs-target="#leadModal">View</button>
+                                                <button class="btn btn-sm btn-success" wire:click="convertToLead({{ $information->id }})" title="Convert to Lead"><i class="bi bi-person-plus-fill"></i></button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -255,13 +257,13 @@
                                                 <tr>
                                                     <th class="text-muted">Created By:</th>
                                                     <td class="text-wrap text-break">
-                                                        {{ $selectedLead->user->name }}
+                                                        {{ $selectedLead->user->name ?? '-' }}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th class="text-muted">Date:</th>
                                                     <td class="text-wrap text-break">
-                                                        {{ $selectedLead->created_at }}
+                                                        {{ $selectedLead->created_at->format('d-m-Y H:i:s') }}
                                                     </td>
                                                 </tr>
                                                 <tr>

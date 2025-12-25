@@ -41,7 +41,7 @@
                 <th>Post URL</th>
                 <th>Country</th>
                 <th>Status</th>
-                <th>User name</th>
+                <th>Lead created by</th>
                 <th>Created</th>
                 <th width="220">Action</th>
             </tr>
@@ -52,7 +52,18 @@
                 <tr>
                     {{-- <td>{{ $lead->id }}</td> --}}
                     <td>{{ $lead->information->text1 ?? '-' }}</td>
-                    <td>{{ $lead->information->text3 ?? '-' }}</td>
+                    {{-- <td>{{ $lead->information->text3 ?? '-' }}</td> --}}
+                    <td>
+                        @if ($lead->information)
+                            @if(strlen($lead->information->text3) > 40)
+                                <a target="_blank" href="{{ $lead->information->text3 }}" class="text3-text" data-bs-toggle="tooltip" title="{{ $lead->information->text3 }}">
+                                    {{ substr($lead->information->text3, 0, 40) . '...' }}
+                                </a>
+                            @else
+                                <a target="_blank" href="{{ $lead->information->text3 }}">{{ $lead->information->text3 }}</a>
+                            @endif
+                        @endif
+                    </td>
                     <td>{{ $lead->information->text9 ?? '-' }}</td>
 
                     {{-- Status Badge --}}
@@ -66,7 +77,7 @@
                     </td>
 
                     <td>{{ $lead->user->name ?? '-' }}</td>
-                    <td>{{ $lead->created_at->format('d M Y') }}</td>
+                    <td>{{ $lead->created_at->format('d-m-Y') }}</td>
 
                     <td>
                         <div class="d-flex gap-2">
