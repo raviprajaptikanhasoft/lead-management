@@ -84,13 +84,15 @@
 
                             {{-- Status Dropdown --}}
                             <select class="form-select form-select-sm" wire:change="updateStatus({{ $lead->id }}, $event.target.value)">
-                                <option>Change Status</option>
+                                <option value="">Change Status</option>
                                 {{-- <option value="New" {{ $lead->status == 'New' ? 'selected' : '' }}>New</option> --}}
                                 <option value="Won" {{ $lead->status == 'Won' ? 'selected' : '' }}>Won</option>
                                 <option value="Lost" {{ $lead->status == 'Lost' ? 'selected' : '' }}>Lost</option>
                             </select>
 
-                            <a wire:navigate href="{{ route('leads.show', $lead->id) }}" class="btn btn-sm btn-primary">View</a>
+                            <a wire:navigate href="{{ route('leads.show', $lead->id) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i>
+                            </a>
                         </div>
                     </td>
                 </tr>

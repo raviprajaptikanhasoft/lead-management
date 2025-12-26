@@ -55,6 +55,15 @@ class LeadList extends Component
 
     public function updateStatus($id, $status)
     {
+        
+        if(!in_array($status, ['Won', 'Lost'])) {
+            $this->dispatchBrowserEvent('notify', [
+                'type' => 'danger',
+                'message' => 'Invalid status selected.'
+            ]);
+            return;
+        }
+        
         Lead::findOrFail($id)->update(['status' => $status]);
         
         $this->dispatchBrowserEvent('notify', [

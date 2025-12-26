@@ -52,9 +52,20 @@
                                         <label class="form-label small text-muted mb-0">User</label>
                                         <select wire:model="filter_user" class="form-control">
                                             <option value="">All Users</option>
-                                            @foreach ($all_users as $user)
-                                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                            @endforeach
+
+                                            <optgroup label="Active Users">
+                                                @foreach ($all_users->where('is_active', 1) as $user)
+                                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                                @endforeach
+                                            </optgroup>
+
+                                            @if($all_users->where('is_active', 0)->count() > 0)
+                                                <optgroup label="Inactive Users">
+                                                    @foreach ($all_users->where('is_active', 0) as $iuser)
+                                                        <option value="{{ $iuser->id }}">{{ $iuser->name }}</option>
+                                                    @endforeach
+                                                </optgroup>
+                                            @endif
                                         </select>
                                     </div>
 
@@ -172,7 +183,7 @@
                                         <td>{{ $information->created_at->format('d-m-Y H:i:s') }}</td>
                                         <td class="text-center align-middle">
                                             <div class="d-flex justify-content-center gap-1 flex-nowrap">
-                                                <button class="btn btn-sm btn-primary" wire:click="viewLead({{ $information->id }})" title="View Lead Details" data-bs-toggle="modal" data-bs-target="#leadModal">View</button>
+                                                <button class="btn btn-sm btn-primary" wire:click="viewLead({{ $information->id }})" title="View Lead Details" data-bs-toggle="modal" data-bs-target="#leadModal"><i class="bi bi-eye-fill"></i></button>
                                                 <button class="btn btn-sm btn-success" wire:click="convertToLead({{ $information->id }})" title="Convert to Lead"><i class="bi bi-person-plus-fill"></i></button>
                                             </div>
                                         </td>
@@ -197,86 +208,100 @@
                 <!-- Simple Modal Design -->
                 <div wire:ignore.self class="modal fade" id="leadModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Lead Details</h5>
+                        <div class="modal-content border-0 shadow-sm">
+                            <!-- Simple Header -->
+                            <div class="modal-header border-bottom bg-light">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar-circle bg-primary-subtle text-primary">
+                                        <i class="bi bi-person fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="modal-title mb-0 fw-bold">Information Details</h5>
+                                        {{-- <small class="text-muted">ID: #{{ $selectedLead->id ?? '' }}</small> --}}
+                                    </div>
+                                </div>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <div class="modal-body">
+
+                            <div class="modal-body p-0">
                                 @if ($selectedLead)
-                                    <div class="table-responsive">
-                                        <table class="table table-borderless">
-                                            <tbody>
-                                                <tr>
-                                                    <th width="30%" class="text-muted">Lead Name:</th>
-                                                    <td class="text-wrap text-break">{{ $selectedLead->text1 }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Designation:</th>
-                                                    <td class="text-wrap text-break">{{ $selectedLead->text2 }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Company:</th>
-                                                    <td class="text-wrap text-break">{{ $selectedLead->text5 }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Email:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->text7 }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Phone:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->text8 }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">County:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->text9 }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">LinkedIn:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->text6 }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Post URL:</th>
-                                                    <td class="text-wrap text-break">
-                                                        @if ($selectedLead->text3)
-                                                            <a href="{{ $selectedLead->text3 }}" target="_blank"
-                                                                class="text-decoration-none text-break">{{ $selectedLead->text3 }}</a>
-                                                        @else
-                                                            <span class="text-muted">-</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Created By:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->user->name ?? '-' }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Date:</th>
-                                                    <td class="text-wrap text-break">
-                                                        {{ $selectedLead->created_at->format('d-m-Y H:i:s') }}
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <th class="text-muted">Description:</th>
-                                                    <td>
-                                                        <div class="border rounded p-3 bg-light text-wrap text-break"
-                                                            style="min-height: 80px; max-height: 150px; overflow-y: auto;">
-                                                            {{ $selectedLead->text4 }}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <!-- Lead Info in Clean Layout -->
+                                    <div class="p-4 pt-0">
+                                        <!-- Information Table - Clean & Simple -->
+                                        <div class="table-responsive">
+                                            <table class="table table-borderless mb-0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 30%"><i class="bi bi-person-circle me-2"></i>Lead Name:
+                                                        </td>
+                                                        <td>{{ $selectedLead->text1 }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 30%"><i class="bi bi-briefcase me-2"></i>Designation:</td>
+                                                        <td>{{ $selectedLead->text2 }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 30%"><i class="bi bi-building me-2"></i>Company Name:</td>
+                                                        <td>{{ $selectedLead->text5 }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted" style="width: 30%"><i class="bi bi-envelope me-2"></i>Email:</td>
+                                                        <td>{{ $selectedLead->text7 }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted"><i class="bi bi-telephone me-2"></i>Phone:</td>
+                                                        <td>{{ $selectedLead->text8 }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted"><i class="bi bi-geo-alt me-2"></i>Country:</td>
+                                                        <td>{{ $selectedLead->text9 }}</td>
+                                                    </tr>
+                                                    @if ($selectedLead->text6)
+                                                        <tr>
+                                                            <td class="text-muted"><i class="bi bi-linkedin me-2"></i>LinkedIn:</td>
+                                                            <td>{{ $selectedLead->text6 }}</td>
+                                                        </tr>
+                                                    @endif
+                                                    @if ($selectedLead->text3)
+                                                        <tr>
+                                                            <td class="text-muted"><i class="bi bi-link-45deg me-2"></i>Post URL:</td>
+                                                            <td>
+                                                                <a href="{{ $selectedLead->text3 }}" target="_blank"
+                                                                    class="text-decoration-none text-truncate" title="{{ $selectedLead->text3 }}">
+                                                                    Visit Post
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                    <tr>
+                                                        <td class="text-muted"><i class="bi bi-person-plus me-2"></i>Created By:</td>
+                                                        <td>{{ $selectedLead->user->name ?? '-' }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="text-muted"><i class="bi bi-calendar me-2"></i>Date Created:</td>
+                                                        <td>{{ $selectedLead->created_at->format('d M Y, H:i') }}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <!-- Description Box -->
+                                        <div class="pt-3 border-top">
+                                            <h6 class="text-muted mb-2">
+                                                <i class="bi bi-card-text me-2"></i>Description
+                                            </h6>
+                                            <div class="bg-light rounded p-2">
+                                                <p class="mb-0 text-wrap text-break">
+                                                    {{ $selectedLead->text4 ?: 'No description provided' }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- Empty State -->
+                                    <div class="text-center py-5">
+                                        <i class="bi bi-person text-muted fs-1 mb-3"></i>
+                                        <p class="text-muted mb-0">Select a lead to view details</p>
                                     </div>
                                 @endif
                             </div>

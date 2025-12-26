@@ -75,7 +75,7 @@ class InformationList extends Component
         $informations = $query->orderBy($this->sortField, $this->sortAsc ? 'asc' : 'desc')->paginate($this->perPage);
 
         // Count total items with same filter
-        $allUsers = User::select('id', 'name')->isActive()->orderBy('name')->get();
+        $allUsers = User::select('id', 'name', 'is_active')->orderBy('name')->get();
 
         return view('livewire.information.information-list', [
             'informations'      => $informations,
